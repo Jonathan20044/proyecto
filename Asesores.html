@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>CRUD de Asesores</title>
+</head>
+<body>
+
+    <h1>CRUD de Asesores</h1>
+
+    <div class="form-container">
+        <!-- Campos para agregar o actualizar un asesor -->
+        <input type="hidden" id="asesor_id"> <!-- ID oculto para actualizaciones -->
+        <div class="form-group">
+            <label for="nombre_asesor">Nombre del Asesor</label>
+            <input type="text" id="nombre_asesor" placeholder="Nombre del Asesor">
+        </div>
+        <div class="form-group">
+            <label for="edad_asesor">Edad</label>
+            <input type="number" id="edad_asesor" placeholder="Edad">
+        </div>
+        <div class="form-group">
+            <label for="correo_asesor">Correo</label>
+            <input type="email" id="correo_asesor" placeholder="Correo">
+        </div>
+        <div class="form-group">
+            <label for="motos_vendidas">Motos Vendidas</label>
+            <input type="number" id="motos_vendidas" placeholder="Motos Vendidas">
+        </div>
+
+        <div class="button-container">
+            <button id="btn_guardar" onclick="guardarAsesor()">Guardar</button>
+            <button id="btn_eliminar" onclick="eliminarAsesor()" disabled>Eliminar</button>
+            <button id="btn_actualizar" onclick="guardarAsesor()" disabled>Actualizar</button>
+            <button id="btn_limpiar" onclick="limpiarCampos()">Limpiar</button>
+        </div>
+    </div>
+
+    <!-- Mensaje de resultado -->
+    <p id="mensaje_resultado"></p>
+
+    <!-- Tabla para mostrar la lista de asesores -->
+    <h2>Lista de Asesores</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Correo</th>
+                <th>Motos Vendidas</th>
+            </tr>
+        </thead>
+        <tbody id="tabla_asesores">
+            <!-- Aquí se llenarán los asesores -->
+        </tbody>
+    </table>
+
+    <script>
+        // Cargar los asesores al iniciar
+        window.onload = listarAsesores;
+
+        // Función para listar todos los asesores
+        function listarAsesores() {
+            fetch("http://localhost/proyecto2/controlador/asesor.php?op=ObtenerTodos")
+                .then(respuesta => respuesta.json())
+                .then(asesores => {
+                    const tabla = document.getElementById("tabla_asesores");
+                    tabla.innerHTML = ""; // Limpia la tabla antes de llenarla
+                    asesores.forEach(asesor => {
+                        const fila = `
+                            <tr onclick="seleccionarAsesor(${asesor.id}, '${asesor.nombre}', ${asesor.edad}, '${asesor.correo}', ${asesor.motos_vendidas})">
+                                <td>${asesor.id}</td>
+                                <td>${asesor.nombre}</td>
+                                <td>${asesor.edad}</td>
+                                <td>${asesor.correo}</td>
+                                <td>${asesor.motos_vendidas}</td>
+                            </tr>`;
+                        tabla.innerHTML += fila;
+                    });
+                })
+                .catch(error => {
+                    document.getElementById("mensaje_resultado").innerText = "Error al cargar asesores: " + error.message;
+                });
+        }
+
+        // Función para seleccionar un asesor de la tabla
+        function seleccionarAsesor(id, nombre, edad, correo, motosVendidas) {
+            // Cargar los datos en los campos
+            cargarAsesor(id, nombre, edad, correo, motosVendidas);
+
+            // Habilitar los botones de editar y eliminar, deshabilitar el de agregar
+            document.getElementById("btn_actualizar").disabled = false;
+            document.getElementById("btn_eliminar").disabled = false;
+            document.getElementById("btn_guardar").disabled = true;
+        }
+
+        // Función para agregar o actualizar un asesor
+        function guardarAsesor() {
+            const id = document.getElementById("asesor_id").value;
+            const nombre = document.getElementById("nombre_asesor").value;
+            const edad = document.getElementById("edad_asesor").value;
+            const correo = document.getElementById("correo_asesor").value;
+            const motosVendidas = document.getElementById("motos_vendidas").value;
+
+            if (!nombre || !edad || !correo || motosVendidas === "") {
+                document.getElementById("mensaje_resultado").innerText = "Por favor, completa todos los campos.";
+                return;
+            }
+
+            const datos = { id, nombre, edad, correo, motos_vendidas: motosVendidas };
+
+            const url = id
+                ? `http://localhost/proyecto2/controlador/asesor.php?op=Actualizar`
+                : `http://localhost/proyecto2/controlador/asesor.php?op=Insertar`;
+
+            fetch(url, {
+                method: id ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos),
+            })
+                .then(respuesta => respuesta.json())
+                .then(resultado => {
+                    document.getElementById("mensaje_resultado").innerText = resultado.Correcto || "Operación realizada con éxito";
+                    listarAsesores(); // Recargar la tabla
+                    limpiarCampos();
+                })
+                .catch(error => {
+                    document.getElementById("mensaje_resultado").innerText = "Error: " + error.message;
+                });
+        }
+
+        // Función para cargar un asesor en los campos de entrada para edición
+        function cargarAsesor(id, nombre, edad, correo, motosVendidas) {
+            document.getElementById("asesor_id").value = id;
+            document.getElementById("nombre_asesor").value = nombre;
+            document.getElementById("edad_asesor").value = edad;
+            document.getElementById("correo_asesor").value = correo;
+            document.getElementById("motos_vendidas").value = motosVendidas;
+        }
+
+        // Función para eliminar un asesor
+        function eliminarAsesor() {
+            const id = document.getElementById("asesor_id").value;
+            if (confirm("¿Estás seguro de eliminar este asesor?")) {
+                fetch(`http://localhost/proyecto2/controlador/asesor.php?op=Eliminar`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id }),
+                })
+                    .then(respuesta => respuesta.json())
+                    .then(resultado => {
+                        document.getElementById("mensaje_resultado").innerText = resultado.Correcto || "Asesor eliminado con éxito";
+                        listarAsesores();
+                        limpiarCampos(); // Limpiar los campos después de eliminar
+                    })
+                    .catch(error => {
+                        document.getElementById("mensaje_resultado").innerText = "Error: " + error.message;
+                    });
+            }
+        }
+
+        // Función para limpiar los campos de entrada
+        function limpiarCampos() {
+            document.getElementById("asesor_id").value = "";
+            document.getElementById("nombre_asesor").value = "";
+            document.getElementById("edad_asesor").value = "";
+            document.getElementById("correo_asesor").value = "";
+            document.getElementById("motos_vendidas").value = "";
+
+            // Deshabilitar botones de editar y eliminar, habilitar el de agregar
+            document.getElementById("btn_actualizar").disabled = true;
+            document.getElementById("btn_eliminar").disabled = true;
+            document.getElementById("btn_guardar").disabled = false;
+        }
+    </script>
+</body>
+</html>

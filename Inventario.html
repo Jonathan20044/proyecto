@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>CRUD de Inventario de Motos</title>
+</head>
+<body>
+
+    <h1>CRUD de Inventario de Motos</h1>
+
+    <div class="form-container">
+        <input type="hidden" id="moto_id">
+        <div class="form-group">
+            <label for="marca_moto">Marca</label>
+            <input type="text" id="marca_moto" placeholder="Marca">
+        </div>
+
+        <div class="form-group">
+            <label for="modelo_moto">Modelo de la Moto</label>
+            <input type="text" id="modelo_moto" placeholder="Modelo de la Moto">
+        </div>
+     
+        <div class="form-group">
+            <label for="año">Año de Fabricación</label>
+            <input type="number" id="año" placeholder="Año de Fabricación" min="1900" max="2100">
+        </div>
+        
+        <div class="form-group">
+            <label for="precio_moto">Precio</label>
+            <input type="number" id="precio_moto" placeholder="Precio">
+        </div>
+        <div class="form-group">
+            <label for="cantidad_moto">Cantidad</label>
+            <input type="number" id="cantidad_moto" placeholder="Cantidad disponible">
+        </div>
+      
+
+        <div class="button-container">
+            <button id="btn_guardar" onclick="guardarMoto()">Guardar</button>
+            <button id="btn_actualizar" onclick="guardarMoto()" disabled>Actualizar</button>
+            <button id="btn_eliminar" onclick="eliminarMoto()" disabled>Eliminar</button>
+            <button id="btn_limpiar" onclick="limpiarCampos()">Limpiar</button>
+        </div>
+    </div>
+
+    <p id="mensaje_resultado"></p>
+
+    <h2>Inventario de Motos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Modelo</th>
+                <th>Marca</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Año de Fabricación</th>
+            </tr>
+        </thead>
+        <tbody id="tabla_motos"></tbody>
+    </table>
+
+    <script>
+        window.onload = listarMotos;
+
+        function listarMotos() {
+            fetch("http://localhost/proyecto2/controlador/inventariomotos.php?op=ObtenerTodos")
+                .then(res => res.json())
+                .then(motos => {
+                    const tabla = document.getElementById("tabla_motos");
+                    tabla.innerHTML = "";
+                    motos.forEach(moto => {
+                        tabla.innerHTML += `
+                            <tr onclick="seleccionarMoto(${moto.id}, '${moto.modelo}', '${moto.marca}', ${moto.precio}, ${moto.cantidad}, ${moto.año})">
+                                <td>${moto.id}</td>
+                                <td>${moto.modelo}</td>
+                                <td>${moto.marca}</td>
+                                <td>${moto.precio}</td>
+                                <td>${moto.cantidad}</td>
+                                <td>${moto.año}</td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error al cargar el inventario: " + err.message;
+                });
+        }
+
+        function guardarMoto() {
+            const id = document.getElementById("moto_id").value;
+            const modelo = document.getElementById("modelo_moto").value;
+            const marca = document.getElementById("marca_moto").value;
+            const precio = document.getElementById("precio_moto").value;
+            const cantidad = document.getElementById("cantidad_moto").value;
+            const año = document.getElementById("año").value;
+
+            if (!modelo || !marca || !precio || cantidad === "" || !año) {
+                document.getElementById("mensaje_resultado").innerText = "Por favor, completa todos los campos.";
+                return;
+            }
+
+            const datos = { id, modelo, marca, precio, cantidad, año };
+            const url = id
+                ? "http://localhost/proyecto2/controlador/inventariomotos.php?op=Actualizar"
+                : "http://localhost/proyecto2/controlador/inventariomotos.php?op=Insertar";
+
+            fetch(url, {
+                method: id ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos),
+            })
+                .then(res => res.json())
+                .then(result => {
+                    document.getElementById("mensaje_resultado").innerText = result.Correcto || "Operación realizada con éxito";
+                    listarMotos();
+                    limpiarCampos();
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error: " + err.message;
+                });
+        }
+
+        function seleccionarMoto(id, modelo, marca, precio, cantidad, año) {
+            document.getElementById("moto_id").value = id;
+            document.getElementById("modelo_moto").value = modelo;
+            document.getElementById("marca_moto").value = marca;
+            document.getElementById("precio_moto").value = precio;
+            document.getElementById("cantidad_moto").value = cantidad;
+            document.getElementById("año").value = año;
+
+            document.getElementById("btn_actualizar").disabled = false;
+            document.getElementById("btn_eliminar").disabled = false;
+            document.getElementById("btn_guardar").disabled = true;
+        }
+
+        function eliminarMoto() {
+            const id = document.getElementById("moto_id").value;
+
+            if (!id) {
+                document.getElementById("mensaje_resultado").innerText = "No se seleccionó ninguna moto.";
+                return;
+            }
+
+            const confirmacion = confirm("¿Está seguro de que desea eliminar esta moto?");
+            if (!confirmacion) return;
+
+            fetch("http://localhost/proyecto2/controlador/inventariomotos.php?op=Eliminar", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            })
+                .then(res => res.json())
+                .then(result => {
+                    document.getElementById("mensaje_resultado").innerText = result.Correcto || "Operación realizada con éxito";
+                    listarMotos();
+                    limpiarCampos();
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error: " + err.message;
+                });
+        }
+
+        function limpiarCampos() {
+            document.getElementById("moto_id").value = "";
+            document.getElementById("modelo_moto").value = "";
+            document.getElementById("marca_moto").value = "";
+            document.getElementById("precio_moto").value = "";
+            document.getElementById("cantidad_moto").value = "";
+            document.getElementById("año").value = "";
+
+            document.getElementById("btn_actualizar").disabled = true;
+            document.getElementById("btn_eliminar").disabled = true;
+            document.getElementById("btn_guardar").disabled = false;
+        }
+    </script>
+
+</body>
+</html>

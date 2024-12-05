@@ -1,0 +1,153 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 20px;
+}
+
+h2 {
+    color: #333;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.form-container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border: none;
+}
+
+#btn_guardar {
+    background-color: #28a745;
+    color: white;
+}
+
+#btn_guardar:hover {
+    background-color: #218838;
+}
+
+#btn_guardar:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#btn_eliminar {
+    background-color: #dc3545;
+    color: white;
+}
+
+#btn_eliminar:hover {
+    background-color: #c82333;
+}
+
+#btn_eliminar:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#btn_actualizar {
+    background-color: #ffc107;
+    color: white;
+}
+
+#btn_actualizar:hover {
+    background-color: #e0a800;
+}
+
+#btn_actualizar:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#btn_limpiar {
+    background-color: #007bff;
+    color: white;
+}
+
+#btn_limpiar:hover {
+    background-color: #0069d9;
+}
+
+#mensaje_resultado {
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+}
+
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #28a745;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}

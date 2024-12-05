@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>CRUD de Ventas Mensuales</title>
+</head>
+<body>
+
+    <h1>CRUD de Ventas Mensuales</h1>
+
+    <div class="form-container">
+        <input type="hidden" id="venta_id">
+        <div class="form-group">
+            <label for="marca">Marca</label>
+            <input type="text" id="marca" placeholder="Marca">
+        </div>
+
+        <div class="form-group">
+            <label for="modelo">Modelo</label>
+            <input type="text" id="modelo" placeholder="Modelo">
+        </div>
+
+        <div class="form-group">
+            <label for="año">Año</label>
+            <input type="number" id="año" placeholder="Año" min="1900" max="2100">
+        </div>
+
+        <div class="form-group">
+            <label for="cantidad_vendida">Cantidad Vendida</label>
+            <input type="number" id="cantidad_vendida" placeholder="Cantidad Vendida">
+        </div>
+
+        <div class="button-container">
+            <button id="btn_guardar" onclick="guardarVenta()">Guardar</button>
+            <button id="btn_actualizar" onclick="guardarVenta()" disabled>Actualizar</button>
+            <button id="btn_eliminar" onclick="eliminarVenta()" disabled>Eliminar</button>
+            <button id="btn_limpiar" onclick="limpiarCampos()">Limpiar</button>
+        </div>
+    </div>
+
+    <p id="mensaje_resultado"></p>
+
+    <h2>Ventas Mensuales</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>Cantidad Vendida</th>
+            </tr>
+        </thead>
+        <tbody id="tabla_ventas"></tbody>
+    </table>
+
+    <script>
+        window.onload = listarVentas;
+
+        function listarVentas() {
+            fetch("http://localhost/proyecto2/controlador/ventas.php?op=ObtenerTodos")
+                .then(res => res.json())
+                .then(ventas => {
+                    const tabla = document.getElementById("tabla_ventas");
+                    tabla.innerHTML = "";
+                    ventas.forEach(venta => {
+                        tabla.innerHTML += `
+                            <tr onclick="seleccionarVenta(${venta.id}, '${venta.marca}', '${venta.modelo}', ${venta.año}, ${venta.cantidad_vendida})">
+                                <td>${venta.id}</td>
+                                <td>${venta.marca}</td>
+                                <td>${venta.modelo}</td>
+                                <td>${venta.año}</td>
+                                <td>${venta.cantidad_vendida}</td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error al cargar las ventas: " + err.message;
+                });
+        }
+
+        function guardarVenta() {
+            const id = document.getElementById("venta_id").value;
+            const marca = document.getElementById("marca").value;
+            const modelo = document.getElementById("modelo").value;
+            const año = document.getElementById("año").value;
+            const cantidad_vendida = document.getElementById("cantidad_vendida").value;
+
+            if (!marca || !modelo || !año || cantidad_vendida === "") {
+                document.getElementById("mensaje_resultado").innerText = "Por favor, completa todos los campos.";
+                return;
+            }
+
+            const datos = { id, marca, modelo, año, cantidad_vendida };
+            const url = id
+                ? "http://localhost/proyecto2/controlador/ventas.php?op=Actualizar"
+                : "http://localhost/proyecto2/controlador/ventas.php?op=Insertar";
+
+            fetch(url, {
+                method: id ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos),
+            })
+                .then(res => res.json())
+                .then(result => {
+                    document.getElementById("mensaje_resultado").innerText = result.Correcto || "Operación realizada con éxito";
+                    listarVentas();
+                    limpiarCampos();
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error: " + err.message;
+                });
+        }
+
+        function seleccionarVenta(id, marca, modelo, año, cantidad_vendida) {
+            document.getElementById("venta_id").value = id;
+            document.getElementById("marca").value = marca;
+            document.getElementById("modelo").value = modelo;
+            document.getElementById("año").value = año;
+            document.getElementById("cantidad_vendida").value = cantidad_vendida;
+
+            document.getElementById("btn_actualizar").disabled = false;
+            document.getElementById("btn_eliminar").disabled = false;
+            document.getElementById("btn_guardar").disabled = true;
+        }
+
+        function eliminarVenta() {
+            const id = document.getElementById("venta_id").value;
+
+            if (!id) {
+                document.getElementById("mensaje_resultado").innerText = "No se seleccionó ninguna venta.";
+                return;
+            }
+
+            const confirmacion = confirm("¿Está seguro de que desea eliminar esta venta?");
+            if (!confirmacion) return;
+
+            fetch("http://localhost/proyecto2/controlador/ventas.php?op=Eliminar", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            })
+                .then(res => res.json())
+                .then(result => {
+                    document.getElementById("mensaje_resultado").innerText = result.Correcto || "Operación realizada con éxito";
+                    listarVentas();
+                    limpiarCampos();
+                })
+                .catch(err => {
+                    document.getElementById("mensaje_resultado").innerText = "Error: " + err.message;
+                });
+        }
+
+        function limpiarCampos() {
+            document.getElementById("venta_id").value = "";
+            document.getElementById("marca").value = "";
+            document.getElementById("modelo").value = "";
+            document.getElementById("año").value = "";
+            document.getElementById("cantidad_vendida").value = "";
+
+            document.getElementById("btn_actualizar").disabled = true;
+            document.getElementById("btn_eliminar").disabled = true;
+            document.getElementById("btn_guardar").disabled = false;
+        }
+    </script>
+
+</body>
+</html>
