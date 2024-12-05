@@ -64,7 +64,7 @@
 
         // Función para listar todos los asesores
         function listarAsesores() {
-            fetch("http://localhost/proyecto2/controlador/asesor.php?op=ObtenerTodos")
+            fetch("https://api-production-3cb6.up.railway.app/controlador/asesor.php?op=ObtenerTodos")
                 .then(respuesta => respuesta.json())
                 .then(asesores => {
                     const tabla = document.getElementById("tabla_asesores");
@@ -113,8 +113,8 @@
             const datos = { id, nombre, edad, correo, motos_vendidas: motosVendidas };
 
             const url = id
-                ? `http://localhost/proyecto2/controlador/asesor.php?op=Actualizar`
-                : `http://localhost/proyecto2/controlador/asesor.php?op=Insertar`;
+                ? `https://api-production-3cb6.up.railway.app/controlador/asesor.php?op=Actualizar`
+                : `https://api-production-3cb6.up.railway.app/controlador/asesor.php?op=Insertar`;
 
             fetch(url, {
                 method: id ? "PUT" : "POST",
@@ -145,7 +145,7 @@
         function eliminarAsesor() {
             const id = document.getElementById("asesor_id").value;
             if (confirm("¿Estás seguro de eliminar este asesor?")) {
-                fetch(`http://localhost/proyecto2/controlador/asesor.php?op=Eliminar`, {
+                fetch(`https://api-production-3cb6.up.railway.app/controlador/asesor.php?op=Eliminar`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ id }),
