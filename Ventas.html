@@ -60,7 +60,7 @@
         window.onload = listarVentas;
 
         function listarVentas() {
-            fetch("http://localhost/proyecto2/controlador/ventas.php?op=ObtenerTodos")
+            fetch("https://api-production-3cb6.up.railway.app/controlador/ventas.php?op=ObtenerTodos")
                 .then(res => res.json())
                 .then(ventas => {
                     const tabla = document.getElementById("tabla_ventas");
@@ -96,8 +96,8 @@
 
             const datos = { id, marca, modelo, año, cantidad_vendida };
             const url = id
-                ? "http://localhost/proyecto2/controlador/ventas.php?op=Actualizar"
-                : "http://localhost/proyecto2/controlador/ventas.php?op=Insertar";
+                ? "https://api-production-3cb6.up.railway.app/controlador/ventas.php?op=Actualizar"
+                : "https://api-production-3cb6.up.railway.app/controlador/ventas.php?op=Insertar";
 
             fetch(url, {
                 method: id ? "PUT" : "POST",
@@ -138,7 +138,7 @@
             const confirmacion = confirm("¿Está seguro de que desea eliminar esta venta?");
             if (!confirmacion) return;
 
-            fetch("http://localhost/proyecto2/controlador/ventas.php?op=Eliminar", {
+            fetch("https://api-production-3cb6.up.railway.app/controlador/ventas.php?op=Eliminar", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id })
